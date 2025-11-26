@@ -1,0 +1,71 @@
+{
+  "json.schemas": [
+    {
+      "url": "https://cdn.jsdelivr.net/npm/tsup/schema.json",
+      "fileMatch": [
+        "package.json",
+        "tsup.config.json"
+      ]
+    }
+  ],
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
+  "biome.enabled": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports.biome": "explicit"
+  },
+  "cSpell.words": [
+    "cascader",
+    "Cascader",
+    "Checkpointer",
+    "copera",
+    "deepinfra",
+    "dotenvx",
+    "evalite",
+    "excalidraw",
+    "firefox",
+    "Gapcursor",
+    "Hocuspocus",
+    "langchain",
+    "langgraph",
+    "livekit",
+    "Lowlight",
+    "mistralai",
+    "monaco",
+    "monday",
+    "posthog",
+    "prosemirror",
+    "recents",
+    "rrule",
+    "sublists",
+    "syncfusion",
+    "tanstack",
+    "tavily",
+    "todolist",
+    "todolists",
+    "Tolgee",
+    "wavesurfer",
+    "ydoc",
+    "zustand"
+  ],
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "typescript.preferences.importModuleSpecifierEnding": "auto",
+  "typescript.preferences.preferTypeOnlyAutoImports": true,
+  "typescript.tsserver.log": "off",
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  }
+}

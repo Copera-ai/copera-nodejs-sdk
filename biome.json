@@ -1,0 +1,101 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.3.7/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "formatter": {
+    "includes": ["**/src/**"],
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineEnding": "lf",
+    "lineWidth": 80,
+    "attributePosition": "auto"
+  },
+  "html": {
+    "parser": {
+      "interpolation": true
+    }
+  },
+  "css": {
+    "formatter": {
+      "enabled": true
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              ":NODE:",
+              ":BLANK_LINE:",
+              [":PACKAGE:", "!@copera/**"],
+              ":BLANK_LINE:",
+              "@copera/**",
+              ":BLANK_LINE:",
+              ":ALIAS:",
+              ":BLANK_LINE:"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "javascript": {
+    "parser": {
+      "unsafeParameterDecoratorsEnabled": true
+    }
+  },
+  "linter": {
+    "rules": {
+      "performance": {
+        "noBarrelFile": "off"
+      },
+      "complexity": {
+        "noStaticOnlyClass": "off",
+        "noExtraBooleanCast": "off",
+        "useRegexLiterals": "off",
+        "noCommaOperator": "off"
+      },
+      "correctness": {
+        "noSwitchDeclarations": "off",
+        "noUnsafeOptionalChaining": "off",
+        "noSelfAssign": "off",
+        "noVoidTypeReturn": "off",
+        "noEmptyPattern": "off",
+        "noUnusedFunctionParameters": "off",
+        "useImportExtensions": {
+          "fix": "safe",
+          "level": "error",
+          "options": {
+            "forceJsExtensions": true
+          }
+        }
+      },
+      "style": {
+        "noUselessElse": "off",
+        "noParameterAssign": "off",
+        "useDefaultParameterLast": "off",
+        "noDefaultExport": "off",
+        "noNamespace": "off"
+      },
+      "suspicious": {
+        "noAssignInExpressions": "off",
+        "noDoubleEquals": "off",
+        "noThenProperty": "off",
+        "noDuplicateCase": "off",
+        "noSelfCompare": "off",
+        "useIterableCallbackReturn": "off",
+        "noConstEnum": "error",
+        "noConsole": {
+          "level": "error"
+        }
+      }
+    }
+  }
+}
