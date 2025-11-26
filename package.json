@@ -1,9 +1,8 @@
 {
   "name": "@copera.ai/sdk",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Copera.ai NodeJS SDK",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
   "publishConfig": {
     "access": "public"
   },
@@ -24,6 +23,25 @@
     "dist",
     "README.md"
   ],
+  "typesVersions": {
+    "*": {
+      "": [
+        "./dist/index.d.cts"
+      ]
+    }
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
   "scripts": {
     "prebuild": "node -p \"'/*This file is auto generated during build, DO NOT CHANGE OR MODIFY */\\n\\nexport const COPERA_SDK_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
     "build": "tsdown",
