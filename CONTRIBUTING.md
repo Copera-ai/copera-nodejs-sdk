@@ -74,7 +74,7 @@ Not sure where to start? You can look for issues tagged with `good first issue` 
         ```
 
 4.  **Set Up Environment and Install Dependencies:**
-    *   Ensure you have Node.js 22+ and pnpm installed.
+    *   Ensure you have Node.js 18+ and pnpm installed.
     *   Install dependencies:
         ```bash
         pnpm install
