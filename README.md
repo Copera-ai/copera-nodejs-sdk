@@ -201,6 +201,43 @@ const newRow = await copera.board.createTableRow({
 
 **Returns:** `Promise<Row>`
 
+#### `authenticateTableRow(params)`
+
+Authenticate a table row by matching an identifier column and verifying a password column. Useful for building custom authentication systems using board tables.
+
+```typescript
+const row = await copera.board.authenticateTableRow({
+  boardId: 'board-id',
+  tableId: 'table-id',
+  identifierColumnId: 'email-column-id',
+  identifierColumnValue: 'user@example.com',
+  passwordColumnId: 'password-column-id',
+  passwordColumnValue: 'user-password'
+});
+
+if ('error' in row) {
+  // Handle authentication error (400: not found, 401: invalid password)
+  console.error('Auth failed:', row.error);
+} else {
+  // Authentication successful
+  console.log('Authenticated user:', row);
+}
+```
+
+**Parameters:**
+- `boardId` (string, required) - The board ID
+- `tableId` (string, required) - The table ID
+- `identifierColumnId` (string, required) - The column ID to use as identifier (e.g., email, username)
+- `identifierColumnValue` (string, required) - The value to match in the identifier column
+- `passwordColumnId` (string, required) - The password column ID
+- `passwordColumnValue` (string, required) - The plaintext password to verify
+
+**Returns:** `Promise<Row>` - The authenticated row (password columns are masked with `********`)
+
+**Errors:**
+- `400 Bad Request` - No row found with the provided identifier
+- `401 Unauthorized` - Invalid password
+
 ### Channel Methods
 
 #### `sendMessage(params)`
@@ -234,6 +271,7 @@ import {
   Column,
   ColumnValue,
   SendMessageParams,
+  AuthenticateTableRowParams,
   CoperaAIError
 } from '@copera.ai/sdk';
 ```
