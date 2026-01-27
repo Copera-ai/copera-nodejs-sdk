@@ -1,5 +1,11 @@
 # @copera.ai/sdk
 
+## 2.1.1
+
+### Patch Changes
+
+- Fix TypeScript error "Exported variable has or is using name from external module but cannot be named" by re-exporting all types from the main entry point
+
 ## 2.1.0
 
 ### Minor Changes

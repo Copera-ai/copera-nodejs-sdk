@@ -1,6 +1,6 @@
 {
   "name": "@copera.ai/sdk",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Copera.ai NodeJS SDK",
   "type": "module",
   "publishConfig": {

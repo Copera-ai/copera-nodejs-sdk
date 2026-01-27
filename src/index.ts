@@ -15,4 +15,6 @@ export function CoperaAI({ apiKey, sandbox = false }: CoperaAIOptions) {
 
 export { CoperaAIError };
 
+export * from "./types.js";
+
 export default CoperaAI;
