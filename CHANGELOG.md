@@ -1,5 +1,11 @@
 # @copera.ai/sdk
 
+## 2.2.0
+
+### Minor Changes
+
+- Add ColumnOption type and options field to Column interface for status/select columns
+
 ## 2.1.2
 
 ### Patch Changes

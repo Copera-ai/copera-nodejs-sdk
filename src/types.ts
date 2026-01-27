@@ -8,11 +8,20 @@ export interface Board {
 }
 
 // Table Types
+export interface ColumnOption {
+  optionId: string;
+  label?: string;
+  color?: string;
+  order: number;
+  statusGroup?: "TODO" | "IN_PROGRESS" | "DONE";
+}
+
 export interface Column {
   columnId: string;
   label: string;
   type: string;
   order?: number;
+  options?: ColumnOption[];
 }
 
 export interface Table {
