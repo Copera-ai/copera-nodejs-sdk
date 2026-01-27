@@ -1,5 +1,11 @@
 # @copera.ai/sdk
 
+## 2.1.2
+
+### Patch Changes
+
+- Improve error responses to include full response data, status code and status text
+
 ## 2.1.1
 
 ### Patch Changes

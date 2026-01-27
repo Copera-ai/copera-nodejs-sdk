@@ -21,7 +21,11 @@ export function createRequest(
       const data = await response.json();
 
       if (!response.ok) {
-        return { error: data.message } as TResponse;
+        return {
+          ...data,
+          responseCode: response.status,
+          responseStatus: response.statusText,
+        } as TResponse;
       }
 
       return data;
