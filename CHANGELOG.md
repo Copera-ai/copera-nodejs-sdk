@@ -1,5 +1,16 @@
 # @copera.ai/sdk
 
+## 2.1.0
+
+### Minor Changes
+
+- Add authenticateTableRow method to Board API
+
+  - New endpoint: POST /board/{boardId}/table/{tableId}/row/authenticate
+  - Authenticate table rows using identifier and password columns
+  - Enables building custom authentication systems using board tables
+  - Returns authenticated row on success, error object on failure (400/401)
+
 ## 2.0.0
 
 ### Major Changes

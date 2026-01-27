@@ -1,4 +1,5 @@
 import type { createRequest } from "../../requests.js";
+import { createAuthenticateTableRow } from "./authenticate-table-row.js";
 import { createCreateTableRow } from "./create-table-row.js";
 import { createGetBoardDetails } from "./get-board-details.js";
 import { createGetBoardTable } from "./get-board-table.js";
@@ -16,5 +17,6 @@ export function createBoardHandlers(request: ReturnType<typeof createRequest>) {
     listTableRows: createListTableRows(request),
     getTableRow: createGetTableRow(request),
     createTableRow: createCreateTableRow(request),
+    authenticateTableRow: createAuthenticateTableRow(request),
   };
 }

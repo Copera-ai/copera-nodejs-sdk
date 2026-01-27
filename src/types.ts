@@ -55,6 +55,15 @@ export interface CreateRowParams {
   columns: ColumnValue[];
 }
 
+export interface AuthenticateTableRowParams {
+  boardId: string;
+  tableId: string;
+  identifierColumnId: string;
+  identifierColumnValue: string;
+  passwordColumnId: string;
+  passwordColumnValue: string;
+}
+
 export interface ApiError {
   error: string;
 }
