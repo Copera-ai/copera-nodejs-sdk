@@ -25,6 +25,7 @@ export function createRequest(
           ...data,
           responseCode: response.status,
           responseStatus: response.statusText,
+          error: data.error || data.message,
         } as TResponse;
       }
 
