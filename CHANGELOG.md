@@ -1,5 +1,11 @@
 # @copera.ai/sdk
 
+## 2.2.1
+
+### Patch Changes
+
+- Add error field to error responses for easier error handling
+
 ## 2.2.0
 
 ### Minor Changes
