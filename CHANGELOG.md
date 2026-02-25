@@ -1,5 +1,16 @@
 # @copera.ai/sdk
 
+## 2.3.0
+
+### Minor Changes
+
+- feat(board): add row comment endpoints
+
+  Add `listRowComments` and `createRowComment` methods to the board module for managing comments on table rows.
+
+  - `listRowComments`: list comments with cursor-based pagination and visibility filtering
+  - `createRowComment`: create comments with HTML content and visibility control
+
 ## 2.2.1
 
 ### Patch Changes
