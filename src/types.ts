@@ -76,3 +76,55 @@ export interface AuthenticateTableRowParams {
 export interface ApiError {
   error: string;
 }
+
+// Comment Types
+export type CommentVisibility = "internal" | "external";
+export type CommentVisibilityFilter = "all" | "internal" | "external";
+
+export interface CommentAuthor {
+  _id: string;
+  name: string | null;
+  picture: string | null;
+  email: string | null;
+}
+
+export interface RowComment {
+  _id: string;
+  content: string | null;
+  contentType: string;
+  visibility: CommentVisibility;
+  author: CommentAuthor;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Pagination Types
+export interface PageInfo {
+  endCursor: string | null;
+  startCursor: string | null;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+export interface RowCommentPagination {
+  items: RowComment[];
+  pageInfo: PageInfo;
+}
+
+// Comment Request Params
+export interface ListRowCommentsParams {
+  boardId: string;
+  tableId: string;
+  rowId: string;
+  visibility?: CommentVisibilityFilter;
+  after?: string;
+  before?: string;
+}
+
+export interface CreateRowCommentParams {
+  boardId: string;
+  tableId: string;
+  rowId: string;
+  content: string;
+  visibility?: CommentVisibility;
+}

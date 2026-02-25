@@ -315,6 +315,185 @@ describe("CoperaAI", () => {
       );
       expect(result).toEqual(mockRow);
     });
+
+    it("should have listRowComments method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.board).toHaveProperty("listRowComments");
+      expect(typeof sdk.board.listRowComments).toBe("function");
+    });
+
+    it("should call listRowComments with only required parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const boardId = "board123";
+      const tableId = "table123";
+      const rowId = "row123";
+      const mockResponse = {
+        items: [],
+        pageInfo: {
+          endCursor: null,
+          startCursor: null,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
+
+      mockRequest.mockResolvedValue(mockResponse);
+
+      const result = await sdk.board.listRowComments({
+        boardId,
+        tableId,
+        rowId,
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        `/board/${boardId}/table/${tableId}/row/${rowId}/comments`,
+        {
+          method: "GET",
+        },
+      );
+      expect(result).toEqual(mockResponse);
+    });
+
+    it("should call listRowComments with all optional parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const boardId = "board123";
+      const tableId = "table123";
+      const rowId = "row123";
+      const mockResponse = {
+        items: [
+          {
+            _id: "comment1",
+            content: "<p>Test comment</p>",
+            contentType: "text",
+            visibility: "external",
+            author: {
+              _id: "user1",
+              name: "Test User",
+              picture: null,
+              email: "test@example.com",
+            },
+            createdAt: "2024-01-01",
+            updatedAt: "2024-01-01",
+          },
+        ],
+        pageInfo: {
+          endCursor: "comment1",
+          startCursor: "comment1",
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
+
+      mockRequest.mockResolvedValue(mockResponse);
+
+      const result = await sdk.board.listRowComments({
+        boardId,
+        tableId,
+        rowId,
+        visibility: "external",
+        after: "cursorABC",
+        before: "cursorXYZ",
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        `/board/${boardId}/table/${tableId}/row/${rowId}/comments?visibility=external&after=cursorABC&before=cursorXYZ`,
+        {
+          method: "GET",
+        },
+      );
+      expect(result).toEqual(mockResponse);
+    });
+
+    it("should have createRowComment method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.board).toHaveProperty("createRowComment");
+      expect(typeof sdk.board.createRowComment).toBe("function");
+    });
+
+    it("should call createRowComment with correct parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const boardId = "board123";
+      const tableId = "table123";
+      const rowId = "row123";
+      const mockComment = {
+        _id: "comment1",
+        content: "<p>Test comment</p>",
+        contentType: "text",
+        visibility: "external",
+        author: {
+          _id: "user1",
+          name: "Test User",
+          picture: null,
+          email: "test@example.com",
+        },
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-01",
+      };
+
+      mockRequest.mockResolvedValue(mockComment);
+
+      const result = await sdk.board.createRowComment({
+        boardId,
+        tableId,
+        rowId,
+        content: "<p>Test comment</p>",
+        visibility: "external",
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        `/board/${boardId}/table/${tableId}/row/${rowId}/comment`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            content: "<p>Test comment</p>",
+            visibility: "external",
+          }),
+        },
+      );
+      expect(result).toEqual(mockComment);
+    });
+
+    it("should call createRowComment without optional visibility", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const boardId = "board123";
+      const tableId = "table123";
+      const rowId = "row123";
+      const mockComment = {
+        _id: "comment2",
+        content: "Another comment",
+        contentType: "text",
+        visibility: "internal",
+        author: {
+          _id: "user1",
+          name: "Test User",
+          picture: null,
+          email: null,
+        },
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-01",
+      };
+
+      mockRequest.mockResolvedValue(mockComment);
+
+      const result = await sdk.board.createRowComment({
+        boardId,
+        tableId,
+        rowId,
+        content: "Another comment",
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        `/board/${boardId}/table/${tableId}/row/${rowId}/comment`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            content: "Another comment",
+            visibility: undefined,
+          }),
+        },
+      );
+      expect(result).toEqual(mockComment);
+    });
   });
 
   describe("Channel handlers", () => {

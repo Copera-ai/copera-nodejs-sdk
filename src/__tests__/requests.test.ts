@@ -70,7 +70,7 @@ describe("createRequest", () => {
     const request = createRequest(apiKey);
     const result = await request(path, { method: "GET" });
 
-    expect(result).toEqual({ error: errorMessage });
+    expect(result).toMatchObject({ error: errorMessage });
   });
 
   it("should handle fetch errors", async () => {

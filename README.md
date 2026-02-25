@@ -238,6 +238,54 @@ if ('error' in row) {
 - `400 Bad Request` - No row found with the provided identifier
 - `401 Unauthorized` - Invalid password
 
+#### `listRowComments(params)`
+
+List comments on a specific row. Supports cursor-based pagination and visibility filtering.
+
+```typescript
+const comments = await copera.board.listRowComments({
+  boardId: 'board-id',
+  tableId: 'table-id',
+  rowId: 'row-id',
+  visibility: 'all',     // optional: "all" | "internal" | "external"
+  after: 'cursor-id',    // optional: forward pagination cursor
+  before: 'cursor-id'    // optional: backward pagination cursor
+});
+```
+
+**Parameters:**
+- `boardId` (string, required) - The board ID
+- `tableId` (string, required) - The table ID
+- `rowId` (string, required) - The row ID
+- `visibility` (string, optional) - Filter by visibility: `"all"`, `"internal"`, or `"external"`. Defaults to `"all"`
+- `after` (string, optional) - Comment ID cursor for forward pagination
+- `before` (string, optional) - Comment ID cursor for backward pagination
+
+**Returns:** `Promise<RowCommentPagination>`
+
+#### `createRowComment(params)`
+
+Create a new comment on a specific row. Supports HTML content.
+
+```typescript
+const comment = await copera.board.createRowComment({
+  boardId: 'board-id',
+  tableId: 'table-id',
+  rowId: 'row-id',
+  content: '<p>This task needs review</p>',
+  visibility: 'internal'  // optional: "internal" | "external"
+});
+```
+
+**Parameters:**
+- `boardId` (string, required) - The board ID
+- `tableId` (string, required) - The table ID
+- `rowId` (string, required) - The row ID
+- `content` (string, required) - Comment text content (HTML supported)
+- `visibility` (string, optional) - Comment visibility: `"internal"` or `"external"`. Defaults to `"internal"`
+
+**Returns:** `Promise<RowComment>`
+
 ### Channel Methods
 
 #### `sendMessage(params)`
@@ -270,6 +318,12 @@ import {
   Row,
   Column,
   ColumnValue,
+  RowComment,
+  RowCommentPagination,
+  CommentAuthor,
+  PageInfo,
+  ListRowCommentsParams,
+  CreateRowCommentParams,
   SendMessageParams,
   AuthenticateTableRowParams,
   CoperaAIError
@@ -317,6 +371,35 @@ interface Column {
 interface ColumnValue {
   columnId: string;
   value: unknown;
+}
+
+interface RowComment {
+  _id: string;
+  content: string | null;
+  contentType: string;
+  visibility: "internal" | "external";
+  author: CommentAuthor;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CommentAuthor {
+  _id: string;
+  name: string | null;
+  picture: string | null;
+  email: string | null;
+}
+
+interface PageInfo {
+  endCursor: string | null;
+  startCursor: string | null;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+interface RowCommentPagination {
+  items: RowComment[];
+  pageInfo: PageInfo;
 }
 ```
 
