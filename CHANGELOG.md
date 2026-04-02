@@ -1,5 +1,11 @@
 # @copera.ai/sdk
 
+## 2.4.0
+
+### Minor Changes
+
+- Add document service with CRUD, search, and tree endpoints
+
 ## 2.3.0
 
 ### Minor Changes
