@@ -286,6 +286,150 @@ const comment = await copera.board.createRowComment({
 
 **Returns:** `Promise<RowComment>`
 
+### Doc Methods
+
+#### `createDoc(params)`
+
+Create a new document.
+
+```typescript
+const doc = await copera.doc.createDoc({
+  title: 'My Document',
+  parent: 'parent-doc-id',  // optional
+  content: '# Hello World'  // optional, markdown content
+});
+```
+
+**Parameters:**
+- `title` (string, required) - Document title
+- `parent` (string, optional) - Parent document ID for nesting
+- `content` (string, optional) - Initial markdown content (processed asynchronously)
+
+**Returns:** `Promise<Doc>`
+
+#### `getDocDetails(params)`
+
+Get metadata of a specific document.
+
+```typescript
+const doc = await copera.doc.getDocDetails({
+  docId: 'doc-id'
+});
+```
+
+**Parameters:**
+- `docId` (string, required) - The document ID
+
+**Returns:** `Promise<Doc>`
+
+#### `getDocContent(params)`
+
+Get the markdown content of a document.
+
+```typescript
+const { content } = await copera.doc.getDocContent({
+  docId: 'doc-id'
+});
+```
+
+**Parameters:**
+- `docId` (string, required) - The document ID
+
+**Returns:** `Promise<DocContent>`
+
+#### `updateDoc(params)`
+
+Update a document's metadata (title, icon, cover).
+
+```typescript
+const doc = await copera.doc.updateDoc({
+  docId: 'doc-id',
+  title: 'Updated Title',
+  icon: { type: 'emoji', value: '📄' },
+  cover: { type: 'url', value: 'https://example.com/cover.jpg' }
+});
+```
+
+**Parameters:**
+- `docId` (string, required) - The document ID
+- `title` (string, optional) - New document title
+- `icon` (DocIcon, optional) - Icon with `type` and `value`
+- `cover` (DocCover, optional) - Cover with `type` and `value`
+
+**Returns:** `Promise<Doc>`
+
+#### `updateDocContent(params)`
+
+Update a document's markdown content. Updates are processed asynchronously.
+
+```typescript
+const result = await copera.doc.updateDocContent({
+  docId: 'doc-id',
+  operation: 'replace',  // "replace" | "append" | "prepend"
+  content: '# New Content'
+});
+```
+
+**Parameters:**
+- `docId` (string, required) - The document ID
+- `operation` (string, required) - `"replace"`, `"append"`, or `"prepend"`
+- `content` (string, required) - Markdown content to apply
+
+**Returns:** `Promise<DocContentUpdateResult>`
+
+#### `deleteDoc(params)`
+
+Delete a document (soft-delete). Only the document owner can delete.
+
+```typescript
+const result = await copera.doc.deleteDoc({
+  docId: 'doc-id'
+});
+```
+
+**Parameters:**
+- `docId` (string, required) - The document ID
+
+**Returns:** `Promise<DocDeleteResult>`
+
+#### `searchDocs(params)`
+
+Search documents by query. Returns highlighted matches in title and content.
+
+```typescript
+const results = await copera.doc.searchDocs({
+  q: 'meeting notes',
+  sortBy: 'updatedAt',    // optional: "createdAt" | "updatedAt"
+  sortOrder: 'desc',      // optional: "asc" | "desc"
+  limit: 20               // optional: 1-50
+});
+```
+
+**Parameters:**
+- `q` (string, required) - Search query
+- `sortBy` (string, optional) - Sort field: `"createdAt"` or `"updatedAt"`. Defaults to `"updatedAt"`
+- `sortOrder` (string, optional) - Sort direction: `"asc"` or `"desc"`. Defaults to `"desc"`
+- `limit` (number, optional) - Max results 1-50. Defaults to 20
+
+**Returns:** `Promise<DocSearchResult>`
+
+#### `getDocTree(params)`
+
+Get the hierarchical document tree.
+
+```typescript
+const tree = await copera.doc.getDocTree({
+  parentId: 'doc-id',  // optional: start from specific doc
+  depth: 3             // optional: max nesting depth 1-10
+});
+```
+
+**Parameters:**
+- `parentId` (string, optional) - Start tree from this document (omit for root-level)
+- `depth` (number, optional) - Max nesting depth 1-10. Defaults to 3
+
+**Returns:** `Promise<DocTreeResult>`
+
 ### Channel Methods
 
 #### `sendMessage(params)`
@@ -322,8 +466,23 @@ import {
   RowCommentPagination,
   CommentAuthor,
   PageInfo,
+  Doc,
+  DocContent,
+  DocIcon,
+  DocCover,
+  DocContentUpdateResult,
+  DocDeleteResult,
+  DocSearchResult,
+  DocSearchHit,
+  DocTreeResult,
+  DocTreeNode,
   ListRowCommentsParams,
   CreateRowCommentParams,
+  CreateDocParams,
+  UpdateDocParams,
+  UpdateDocContentParams,
+  SearchDocsParams,
+  GetDocTreeParams,
   SendMessageParams,
   AuthenticateTableRowParams,
   CoperaAIError
@@ -400,6 +559,68 @@ interface PageInfo {
 interface RowCommentPagination {
   items: RowComment[];
   pageInfo: PageInfo;
+}
+
+interface Doc {
+  _id: string;
+  title: string;
+  owner: string;
+  createdAt: string;
+  updatedAt: string;
+  icon?: DocIcon;
+  cover?: DocCover;
+  starred: boolean;
+  parent?: string;
+}
+
+interface DocIcon {
+  type: string;
+  value: string;
+}
+
+interface DocCover {
+  type: string;
+  value: string;
+}
+
+interface DocContent {
+  content: string;
+}
+
+interface DocContentUpdateResult {
+  success: boolean;
+  message: string;
+}
+
+interface DocDeleteResult {
+  success: boolean;
+}
+
+interface DocSearchResult {
+  hits: DocSearchHit[];
+  totalHits: number;
+  query: string;
+}
+
+interface DocSearchHit {
+  _id: string;
+  title: string;
+  parents: DocSearchParent[];
+  highlight: DocSearchHighlight;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface DocTreeResult {
+  root: DocTreeNode[];
+  totalDocs: number;
+  truncated: boolean;
+  nextParentIds: string[];
+}
+
+interface DocTreeNode extends Doc {
+  hasChildren: boolean;
+  children: DocTreeNode[];
 }
 ```
 
@@ -496,6 +717,49 @@ async function manageBoardData() {
 }
 
 manageBoardData().catch(console.error);
+```
+
+### Document Management
+
+```typescript
+import { CoperaAI } from '@copera.ai/sdk';
+
+const copera = CoperaAI({ apiKey: process.env.COPERA_API_KEY });
+
+async function manageDocuments() {
+  // 1. Create a document
+  const doc = await copera.doc.createDoc({
+    title: 'Project Notes',
+    content: '# Project Notes\n\nInitial content here.'
+  });
+
+  // 2. Update the document title and icon
+  await copera.doc.updateDoc({
+    docId: doc._id,
+    title: 'Project Notes - Q1 2026',
+    icon: { type: 'emoji', value: '📋' }
+  });
+
+  // 3. Append content
+  await copera.doc.updateDocContent({
+    docId: doc._id,
+    operation: 'append',
+    content: '\n## New Section\n\nAppended via SDK.'
+  });
+
+  // 4. Search documents
+  const results = await copera.doc.searchDocs({
+    q: 'Project Notes',
+    limit: 10
+  });
+  console.log('Found:', results.totalHits, 'documents');
+
+  // 5. Browse document tree
+  const tree = await copera.doc.getDocTree({ depth: 3 });
+  console.log('Root documents:', tree.root.length);
+}
+
+manageDocuments().catch(console.error);
 ```
 
 ### Send Notifications
