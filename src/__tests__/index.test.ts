@@ -28,6 +28,7 @@ describe("CoperaAI", () => {
       expect(createRequest).toHaveBeenCalledWith(apiKey, false);
       expect(sdk).toHaveProperty("board");
       expect(sdk).toHaveProperty("channel");
+      expect(sdk).toHaveProperty("doc");
     });
 
     it("should initialize with sandbox mode enabled", () => {
@@ -36,6 +37,7 @@ describe("CoperaAI", () => {
       expect(createRequest).toHaveBeenCalledWith(apiKey, true);
       expect(sdk).toHaveProperty("board");
       expect(sdk).toHaveProperty("channel");
+      expect(sdk).toHaveProperty("doc");
     });
 
     it("should initialize with sandbox mode disabled by default", () => {
@@ -550,6 +552,307 @@ describe("CoperaAI", () => {
         },
       );
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe("Doc handlers", () => {
+    it("should have createDoc method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.doc).toHaveProperty("createDoc");
+      expect(typeof sdk.doc.createDoc).toBe("function");
+    });
+
+    it("should call createDoc with all parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const mockDoc = {
+        _id: "doc123",
+        title: "Test Doc",
+        owner: "user1",
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-01",
+        starred: false,
+      };
+
+      mockRequest.mockResolvedValue(mockDoc);
+
+      const result = await sdk.doc.createDoc({
+        title: "Test Doc",
+        parent: "parentDoc123",
+        content: "# Hello",
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith("/docs/", {
+        method: "POST",
+        body: JSON.stringify({
+          title: "Test Doc",
+          parent: "parentDoc123",
+          content: "# Hello",
+        }),
+      });
+      expect(result).toEqual(mockDoc);
+    });
+
+    it("should call createDoc with only required parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      mockRequest.mockResolvedValue({});
+
+      await sdk.doc.createDoc({ title: "Test Doc" });
+
+      expect(mockRequest).toHaveBeenCalledWith("/docs/", {
+        method: "POST",
+        body: JSON.stringify({
+          title: "Test Doc",
+          parent: undefined,
+          content: undefined,
+        }),
+      });
+    });
+
+    it("should have getDocDetails method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.doc).toHaveProperty("getDocDetails");
+      expect(typeof sdk.doc.getDocDetails).toBe("function");
+    });
+
+    it("should call getDocDetails with correct parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const docId = "doc123";
+      const mockDoc = {
+        _id: docId,
+        title: "Test Doc",
+        owner: "user1",
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-01",
+        starred: false,
+      };
+
+      mockRequest.mockResolvedValue(mockDoc);
+
+      const result = await sdk.doc.getDocDetails({ docId });
+
+      expect(mockRequest).toHaveBeenCalledWith(`/docs/${docId}`, {
+        method: "GET",
+      });
+      expect(result).toEqual(mockDoc);
+    });
+
+    it("should have getDocContent method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.doc).toHaveProperty("getDocContent");
+      expect(typeof sdk.doc.getDocContent).toBe("function");
+    });
+
+    it("should call getDocContent with correct parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const docId = "doc123";
+      const mockContent = { content: "# Hello World" };
+
+      mockRequest.mockResolvedValue(mockContent);
+
+      const result = await sdk.doc.getDocContent({ docId });
+
+      expect(mockRequest).toHaveBeenCalledWith(`/docs/${docId}/md`, {
+        method: "GET",
+      });
+      expect(result).toEqual(mockContent);
+    });
+
+    it("should have updateDoc method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.doc).toHaveProperty("updateDoc");
+      expect(typeof sdk.doc.updateDoc).toBe("function");
+    });
+
+    it("should call updateDoc with all parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const docId = "doc123";
+      const mockDoc = {
+        _id: docId,
+        title: "Updated Title",
+        owner: "user1",
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-02",
+        starred: false,
+      };
+
+      mockRequest.mockResolvedValue(mockDoc);
+
+      const result = await sdk.doc.updateDoc({
+        docId,
+        title: "Updated Title",
+        icon: { type: "emoji", value: "📄" },
+        cover: { type: "url", value: "https://example.com/cover.jpg" },
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(`/docs/${docId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          title: "Updated Title",
+          icon: { type: "emoji", value: "📄" },
+          cover: { type: "url", value: "https://example.com/cover.jpg" },
+        }),
+      });
+      expect(result).toEqual(mockDoc);
+    });
+
+    it("should call updateDoc with only docId", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const docId = "doc123";
+      mockRequest.mockResolvedValue({});
+
+      await sdk.doc.updateDoc({ docId });
+
+      expect(mockRequest).toHaveBeenCalledWith(`/docs/${docId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          title: undefined,
+          icon: undefined,
+          cover: undefined,
+        }),
+      });
+    });
+
+    it("should have updateDocContent method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.doc).toHaveProperty("updateDocContent");
+      expect(typeof sdk.doc.updateDocContent).toBe("function");
+    });
+
+    it("should call updateDocContent with correct parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const docId = "doc123";
+      const mockResult = { success: true, message: "Content update queued" };
+
+      mockRequest.mockResolvedValue(mockResult);
+
+      const result = await sdk.doc.updateDocContent({
+        docId,
+        operation: "replace",
+        content: "# New Content",
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(`/docs/${docId}/md`, {
+        method: "POST",
+        body: JSON.stringify({
+          operation: "replace",
+          content: "# New Content",
+        }),
+      });
+      expect(result).toEqual(mockResult);
+    });
+
+    it("should have deleteDoc method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.doc).toHaveProperty("deleteDoc");
+      expect(typeof sdk.doc.deleteDoc).toBe("function");
+    });
+
+    it("should call deleteDoc with correct parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const docId = "doc123";
+      const mockResult = { success: true };
+
+      mockRequest.mockResolvedValue(mockResult);
+
+      const result = await sdk.doc.deleteDoc({ docId });
+
+      expect(mockRequest).toHaveBeenCalledWith(`/docs/${docId}`, {
+        method: "DELETE",
+        body: JSON.stringify({}),
+      });
+      expect(result).toEqual(mockResult);
+    });
+
+    it("should have searchDocs method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.doc).toHaveProperty("searchDocs");
+      expect(typeof sdk.doc.searchDocs).toBe("function");
+    });
+
+    it("should call searchDocs with only required q parameter", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const mockResult = { hits: [], totalHits: 0, query: "test" };
+
+      mockRequest.mockResolvedValue(mockResult);
+
+      const result = await sdk.doc.searchDocs({ q: "test" });
+
+      expect(mockRequest).toHaveBeenCalledWith("/docs/search?q=test", {
+        method: "GET",
+      });
+      expect(result).toEqual(mockResult);
+    });
+
+    it("should call searchDocs with all optional parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const mockResult = { hits: [], totalHits: 0, query: "test" };
+
+      mockRequest.mockResolvedValue(mockResult);
+
+      const result = await sdk.doc.searchDocs({
+        q: "test",
+        sortBy: "createdAt",
+        sortOrder: "desc",
+        limit: 10,
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        "/docs/search?q=test&sortBy=createdAt&sortOrder=desc&limit=10",
+        {
+          method: "GET",
+        },
+      );
+      expect(result).toEqual(mockResult);
+    });
+
+    it("should have getDocTree method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.doc).toHaveProperty("getDocTree");
+      expect(typeof sdk.doc.getDocTree).toBe("function");
+    });
+
+    it("should call getDocTree with no parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const mockResult = {
+        root: [],
+        totalDocs: 0,
+        truncated: false,
+        nextParentIds: [],
+      };
+
+      mockRequest.mockResolvedValue(mockResult);
+
+      const result = await sdk.doc.getDocTree();
+
+      expect(mockRequest).toHaveBeenCalledWith("/docs/tree", {
+        method: "GET",
+      });
+      expect(result).toEqual(mockResult);
+    });
+
+    it("should call getDocTree with all parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const mockResult = {
+        root: [],
+        totalDocs: 0,
+        truncated: false,
+        nextParentIds: [],
+      };
+
+      mockRequest.mockResolvedValue(mockResult);
+
+      const result = await sdk.doc.getDocTree({
+        parentId: "doc123",
+        depth: 5,
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        "/docs/tree?parentId=doc123&depth=5",
+        {
+          method: "GET",
+        },
+      );
+      expect(result).toEqual(mockResult);
     });
   });
 

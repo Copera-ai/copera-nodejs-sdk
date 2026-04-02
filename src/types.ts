@@ -128,3 +128,110 @@ export interface CreateRowCommentParams {
   content: string;
   visibility?: CommentVisibility;
 }
+
+// Doc Types
+export interface DocIcon {
+  type: string;
+  value: string;
+}
+
+export interface DocCover {
+  type: string;
+  value: string;
+}
+
+export interface Doc {
+  _id: string;
+  title: string;
+  owner: string;
+  createdAt: string;
+  updatedAt: string;
+  icon?: DocIcon;
+  cover?: DocCover;
+  starred: boolean;
+  parent?: string;
+}
+
+export interface DocContent {
+  content: string;
+}
+
+export interface DocContentUpdateResult {
+  success: boolean;
+  message: string;
+}
+
+export interface DocDeleteResult {
+  success: boolean;
+}
+
+// Doc Search Types
+export interface DocSearchHighlight {
+  title: string;
+  mdBody: string;
+}
+
+export interface DocSearchParent {
+  _id: string;
+  title: string;
+}
+
+export interface DocSearchHit {
+  _id: string;
+  title: string;
+  parents: DocSearchParent[];
+  highlight: DocSearchHighlight;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DocSearchResult {
+  hits: DocSearchHit[];
+  totalHits: number;
+  query: string;
+}
+
+// Doc Tree Types
+export interface DocTreeNode extends Doc {
+  hasChildren: boolean;
+  children: DocTreeNode[];
+}
+
+export interface DocTreeResult {
+  root: DocTreeNode[];
+  totalDocs: number;
+  truncated: boolean;
+  nextParentIds: string[];
+}
+
+// Doc Request Params
+export interface CreateDocParams {
+  title: string;
+  parent?: string;
+  content?: string;
+}
+
+export interface UpdateDocParams {
+  docId: string;
+  title?: string;
+  icon?: DocIcon;
+  cover?: DocCover;
+}
+
+export interface UpdateDocContentParams {
+  docId: string;
+  operation: string;
+  content: string;
+}
+
+export interface SearchDocsParams {
+  q: string;
+  sortBy?: string;
+  sortOrder?: string;
+  limit?: number;
+}
+
+export interface GetDocTreeParams {
+  parentId?: string;
+  depth?: number;
+}
