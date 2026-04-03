@@ -235,3 +235,92 @@ export interface GetDocTreeParams {
   parentId?: string;
   depth?: number;
 }
+
+// Drive Types
+export interface DriveItem {
+  id: string;
+  name: string;
+  type: "file" | "folder";
+  mimeType?: string;
+  fileSize?: number;
+  parentId?: string;
+  owner?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DriveTreeNode {
+  id: string;
+  name: string;
+  type: "file" | "folder";
+  hasChildren: boolean;
+  children: DriveTreeNode[];
+}
+
+export interface DriveTreeResult {
+  root: DriveTreeNode[];
+  totalItems: number;
+  truncated: boolean;
+  nextParentIds: string[];
+}
+
+export interface DriveSearchResult {
+  hits: DriveItem[];
+  totalHits: number;
+  query: string;
+}
+
+export interface DriveDownloadResult {
+  url: string;
+}
+
+export interface DriveUploadStartResult {
+  uploadId: string;
+  fileKey: string;
+}
+
+export interface DriveUploadPresignedUrlsResult {
+  urls: string[];
+}
+
+export interface DriveUploadPart {
+  partNumber: number;
+  eTag: string;
+}
+
+// Drive Request Params
+export interface GetDriveTreeParams {
+  parentId?: string;
+  depth?: number;
+}
+
+export interface SearchDriveParams {
+  q: string;
+  sortBy?: string;
+  sortOrder?: string;
+  limit?: number;
+}
+
+export interface CreateFolderParams {
+  name: string;
+  parentId?: string;
+}
+
+export interface StartUploadParams {
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  parentId?: string;
+}
+
+export interface GetPresignedUrlsParams {
+  uploadId: string;
+  fileKey: string;
+  parts: number;
+}
+
+export interface FinalizeUploadParams {
+  uploadId: string;
+  fileKey: string;
+  parts: DriveUploadPart[];
+}

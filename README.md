@@ -55,6 +55,10 @@ await copera.channel.sendMessage({
   channelId: 'channel-id',
   message: 'Hello from Copera.ai SDK!'
 });
+
+// Browse drive files
+const tree = await copera.drive.getDriveTree({ depth: 3 });
+console.log(tree.root);
 ```
 
 ## Configuration
@@ -451,6 +455,157 @@ await copera.channel.sendMessage({
 
 **Returns:** `Promise<void>`
 
+### Drive Methods
+
+#### `getDriveTree(params?)`
+
+Get the hierarchical drive tree of files and folders.
+
+```typescript
+const tree = await copera.drive.getDriveTree({
+  parentId: 'folder-id',  // optional: start from specific folder
+  depth: 3                // optional: max nesting depth 1-10
+});
+```
+
+**Parameters:**
+- `parentId` (string, optional) - Start tree from this folder (omit for root-level)
+- `depth` (number, optional) - Max nesting depth 1-10. Defaults to 3
+
+**Returns:** `Promise<DriveTreeResult>`
+
+#### `searchDrive(params)`
+
+Search files and folders by name.
+
+```typescript
+const results = await copera.drive.searchDrive({
+  q: 'quarterly report',
+  sortBy: 'updatedAt',    // optional: "name" | "createdAt" | "updatedAt"
+  sortOrder: 'desc',      // optional: "asc" | "desc"
+  limit: 20               // optional
+});
+```
+
+**Parameters:**
+- `q` (string, required) - Search query
+- `sortBy` (string, optional) - Sort field
+- `sortOrder` (string, optional) - Sort direction: `"asc"` or `"desc"`
+- `limit` (number, optional) - Max results. Defaults to 20
+
+**Returns:** `Promise<DriveSearchResult>`
+
+#### `getFile(params)`
+
+Get metadata for a file or folder.
+
+```typescript
+const file = await copera.drive.getFile({
+  fileId: 'file-id'
+});
+```
+
+**Parameters:**
+- `fileId` (string, required) - The file or folder ID
+
+**Returns:** `Promise<DriveItem>`
+
+#### `downloadFile(params)`
+
+Get a signed download URL for a file (valid for 3 hours).
+
+```typescript
+const { url } = await copera.drive.downloadFile({
+  fileId: 'file-id'
+});
+// Use the signed URL to download the file
+```
+
+**Parameters:**
+- `fileId` (string, required) - The file ID (folders not supported)
+
+**Returns:** `Promise<DriveDownloadResult>`
+
+#### `createFolder(params)`
+
+Create a new folder.
+
+```typescript
+const folder = await copera.drive.createFolder({
+  name: 'Reports',
+  parentId: 'parent-folder-id'  // optional
+});
+```
+
+**Parameters:**
+- `name` (string, required) - Folder name
+- `parentId` (string, optional) - Parent folder ID (omit for root-level)
+
+**Returns:** `Promise<DriveItem>`
+
+#### `startUpload(params)`
+
+Start a multipart file upload. Returns an upload ID and file key for subsequent steps.
+
+```typescript
+const { uploadId, fileKey } = await copera.drive.startUpload({
+  fileName: 'report.pdf',
+  fileSize: 1048576,
+  mimeType: 'application/pdf',
+  parentId: 'folder-id'  // optional
+});
+```
+
+**Parameters:**
+- `fileName` (string, required) - File name
+- `fileSize` (number, required) - Total file size in bytes
+- `mimeType` (string, required) - MIME type (e.g., `"application/pdf"`)
+- `parentId` (string, optional) - Parent folder ID
+
+**Returns:** `Promise<DriveUploadStartResult>`
+
+#### `getPresignedUrls(params)`
+
+Get presigned S3 URLs for uploading file parts.
+
+```typescript
+const { urls } = await copera.drive.getPresignedUrls({
+  uploadId: 'upload-id',
+  fileKey: 'file-key',
+  parts: 3
+});
+// Upload each chunk via PUT to the corresponding URL
+```
+
+**Parameters:**
+- `uploadId` (string, required) - Upload ID from `startUpload`
+- `fileKey` (string, required) - File key from `startUpload`
+- `parts` (number, required) - Number of file chunks
+
+**Returns:** `Promise<DriveUploadPresignedUrlsResult>`
+
+#### `finalizeUpload(params)`
+
+Finalize a multipart upload after all parts have been uploaded to S3.
+
+```typescript
+const file = await copera.drive.finalizeUpload({
+  uploadId: 'upload-id',
+  fileKey: 'file-key',
+  parts: [
+    { partNumber: 1, eTag: 'etag-from-s3' },
+    { partNumber: 2, eTag: 'etag-from-s3' }
+  ]
+});
+```
+
+**Parameters:**
+- `uploadId` (string, required) - Upload ID from `startUpload`
+- `fileKey` (string, required) - File key from `startUpload`
+- `parts` (DriveUploadPart[], required) - Array of `{ partNumber, eTag }` from S3 responses
+
+**Returns:** `Promise<DriveItem>`
+
 ## TypeScript Types
 
 The SDK exports all TypeScript types for your convenience:
@@ -483,6 +638,20 @@ import {
   UpdateDocContentParams,
   SearchDocsParams,
   GetDocTreeParams,
+  DriveItem,
+  DriveTreeNode,
+  DriveTreeResult,
+  DriveSearchResult,
+  DriveDownloadResult,
+  DriveUploadStartResult,
+  DriveUploadPresignedUrlsResult,
+  DriveUploadPart,
+  GetDriveTreeParams,
+  SearchDriveParams,
+  CreateFolderParams,
+  StartUploadParams,
+  GetPresignedUrlsParams,
+  FinalizeUploadParams,
   SendMessageParams,
   AuthenticateTableRowParams,
   CoperaAIError
@@ -622,6 +791,57 @@ interface DocTreeNode extends Doc {
   hasChildren: boolean;
   children: DocTreeNode[];
 }
+
+interface DriveItem {
+  id: string;
+  name: string;
+  type: "file" | "folder";
+  mimeType?: string;
+  fileSize?: number;
+  parentId?: string;
+  owner?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface DriveTreeNode {
+  id: string;
+  name: string;
+  type: "file" | "folder";
+  hasChildren: boolean;
+  children: DriveTreeNode[];
+}
+
+interface DriveTreeResult {
+  root: DriveTreeNode[];
+  totalItems: number;
+  truncated: boolean;
+  nextParentIds: string[];
+}
+
+interface DriveSearchResult {
+  hits: DriveItem[];
+  totalHits: number;
+  query: string;
+}
+
+interface DriveDownloadResult {
+  url: string;
+}
+
+interface DriveUploadStartResult {
+  uploadId: string;
+  fileKey: string;
+}
+
+interface DriveUploadPresignedUrlsResult {
+  urls: string[];
+}
+
+interface DriveUploadPart {
+  partNumber: number;
+  eTag: string;
+}
 ```
 
 ## Error Handling
@@ -760,6 +980,64 @@ async function manageDocuments() {
 }
 
 manageDocuments().catch(console.error);
+```
+
+### File Storage with Drive
+
+```typescript
+import { CoperaAI } from '@copera.ai/sdk';
+
+const copera = CoperaAI({ apiKey: process.env.COPERA_API_KEY });
+
+async function manageDrive() {
+  // 1. Create a folder
+  const folder = await copera.drive.createFolder({
+    name: 'Project Files'
+  });
+
+  // 2. Upload a file (multipart)
+  const { uploadId, fileKey } = await copera.drive.startUpload({
+    fileName: 'report.pdf',
+    fileSize: 5242880,  // 5 MB
+    mimeType: 'application/pdf',
+    parentId: folder.id
+  });
+
+  // 3. Get presigned URLs for upload chunks
+  const { urls } = await copera.drive.getPresignedUrls({
+    uploadId,
+    fileKey,
+    parts: 1
+  });
+
+  // 4. Upload chunks to S3 (using fetch or any HTTP client)
+  const response = await fetch(urls[0], {
+    method: 'PUT',
+    body: fileBuffer
+  });
+  const eTag = response.headers.get('etag')!;
+
+  // 5. Finalize the upload
+  const file = await copera.drive.finalizeUpload({
+    uploadId,
+    fileKey,
+    parts: [{ partNumber: 1, eTag }]
+  });
+
+  // 6. Browse the drive tree
+  const tree = await copera.drive.getDriveTree({ depth: 3 });
+  console.log('Drive items:', tree.totalItems);
+
+  // 7. Search for files
+  const results = await copera.drive.searchDrive({ q: 'report' });
+  console.log('Found:', results.totalHits, 'files');
+
+  // 8. Get a download link
+  const { url } = await copera.drive.downloadFile({ fileId: file.id });
+  console.log('Download URL:', url);
+}
+
+manageDrive().catch(console.error);
 ```
 
 ### Send Notifications

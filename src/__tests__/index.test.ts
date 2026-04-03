@@ -29,6 +29,7 @@ describe("CoperaAI", () => {
       expect(sdk).toHaveProperty("board");
       expect(sdk).toHaveProperty("channel");
       expect(sdk).toHaveProperty("doc");
+      expect(sdk).toHaveProperty("drive");
     });
 
     it("should initialize with sandbox mode enabled", () => {
@@ -38,6 +39,7 @@ describe("CoperaAI", () => {
       expect(sdk).toHaveProperty("board");
       expect(sdk).toHaveProperty("channel");
       expect(sdk).toHaveProperty("doc");
+      expect(sdk).toHaveProperty("drive");
     });
 
     it("should initialize with sandbox mode disabled by default", () => {
@@ -853,6 +855,295 @@ describe("CoperaAI", () => {
         },
       );
       expect(result).toEqual(mockResult);
+    });
+  });
+
+  describe("Drive handlers", () => {
+    it("should have getDriveTree method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.drive).toHaveProperty("getDriveTree");
+      expect(typeof sdk.drive.getDriveTree).toBe("function");
+    });
+
+    it("should call getDriveTree with no parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const mockResult = {
+        root: [],
+        totalItems: 0,
+        truncated: false,
+        nextParentIds: [],
+      };
+
+      mockRequest.mockResolvedValue(mockResult);
+
+      const result = await sdk.drive.getDriveTree();
+
+      expect(mockRequest).toHaveBeenCalledWith("/drive/tree", {
+        method: "GET",
+      });
+      expect(result).toEqual(mockResult);
+    });
+
+    it("should call getDriveTree with all parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      mockRequest.mockResolvedValue({});
+
+      await sdk.drive.getDriveTree({ parentId: "folder123", depth: 5 });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        "/drive/tree?parentId=folder123&depth=5",
+        {
+          method: "GET",
+        },
+      );
+    });
+
+    it("should have searchDrive method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.drive).toHaveProperty("searchDrive");
+      expect(typeof sdk.drive.searchDrive).toBe("function");
+    });
+
+    it("should call searchDrive with only required q parameter", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const mockResult = { hits: [], totalHits: 0, query: "report" };
+
+      mockRequest.mockResolvedValue(mockResult);
+
+      const result = await sdk.drive.searchDrive({ q: "report" });
+
+      expect(mockRequest).toHaveBeenCalledWith("/drive/search?q=report", {
+        method: "GET",
+      });
+      expect(result).toEqual(mockResult);
+    });
+
+    it("should call searchDrive with all optional parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      mockRequest.mockResolvedValue({});
+
+      await sdk.drive.searchDrive({
+        q: "report",
+        sortBy: "createdAt",
+        sortOrder: "asc",
+        limit: 5,
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        "/drive/search?q=report&sortBy=createdAt&sortOrder=asc&limit=5",
+        {
+          method: "GET",
+        },
+      );
+    });
+
+    it("should have getFile method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.drive).toHaveProperty("getFile");
+      expect(typeof sdk.drive.getFile).toBe("function");
+    });
+
+    it("should call getFile with correct parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const fileId = "file123";
+      const mockFile = {
+        id: fileId,
+        name: "report.pdf",
+        type: "file",
+        mimeType: "application/pdf",
+        fileSize: 1024,
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-01",
+      };
+
+      mockRequest.mockResolvedValue(mockFile);
+
+      const result = await sdk.drive.getFile({ fileId });
+
+      expect(mockRequest).toHaveBeenCalledWith(`/drive/files/${fileId}`, {
+        method: "GET",
+      });
+      expect(result).toEqual(mockFile);
+    });
+
+    it("should have downloadFile method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.drive).toHaveProperty("downloadFile");
+      expect(typeof sdk.drive.downloadFile).toBe("function");
+    });
+
+    it("should call downloadFile with correct parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const fileId = "file123";
+      const mockResult = { url: "https://cdn.example.com/signed-url" };
+
+      mockRequest.mockResolvedValue(mockResult);
+
+      const result = await sdk.drive.downloadFile({ fileId });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        `/drive/files/${fileId}/download`,
+        {
+          method: "GET",
+        },
+      );
+      expect(result).toEqual(mockResult);
+    });
+
+    it("should have createFolder method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.drive).toHaveProperty("createFolder");
+      expect(typeof sdk.drive.createFolder).toBe("function");
+    });
+
+    it("should call createFolder with all parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const mockFolder = {
+        id: "folder123",
+        name: "New Folder",
+        type: "folder",
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-01",
+      };
+
+      mockRequest.mockResolvedValue(mockFolder);
+
+      const result = await sdk.drive.createFolder({
+        name: "New Folder",
+        parentId: "parentFolder123",
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith("/drive/folders", {
+        method: "POST",
+        body: JSON.stringify({
+          name: "New Folder",
+          parentId: "parentFolder123",
+        }),
+      });
+      expect(result).toEqual(mockFolder);
+    });
+
+    it("should call createFolder with only required parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      mockRequest.mockResolvedValue({});
+
+      await sdk.drive.createFolder({ name: "Root Folder" });
+
+      expect(mockRequest).toHaveBeenCalledWith("/drive/folders", {
+        method: "POST",
+        body: JSON.stringify({
+          name: "Root Folder",
+          parentId: undefined,
+        }),
+      });
+    });
+
+    it("should have startUpload method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.drive).toHaveProperty("startUpload");
+      expect(typeof sdk.drive.startUpload).toBe("function");
+    });
+
+    it("should call startUpload with correct parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const mockResult = { uploadId: "upload123", fileKey: "key123" };
+
+      mockRequest.mockResolvedValue(mockResult);
+
+      const result = await sdk.drive.startUpload({
+        fileName: "report.pdf",
+        fileSize: 1048576,
+        mimeType: "application/pdf",
+        parentId: "folder123",
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        "/drive/files/upload/multipart/start",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            fileName: "report.pdf",
+            fileSize: 1048576,
+            mimeType: "application/pdf",
+            parentId: "folder123",
+          }),
+        },
+      );
+      expect(result).toEqual(mockResult);
+    });
+
+    it("should have getPresignedUrls method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.drive).toHaveProperty("getPresignedUrls");
+      expect(typeof sdk.drive.getPresignedUrls).toBe("function");
+    });
+
+    it("should call getPresignedUrls with correct parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const mockResult = { urls: ["https://s3.example.com/part1"] };
+
+      mockRequest.mockResolvedValue(mockResult);
+
+      const result = await sdk.drive.getPresignedUrls({
+        uploadId: "upload123",
+        fileKey: "key123",
+        parts: 3,
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        "/drive/files/upload/multipart/presigned-urls",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            uploadId: "upload123",
+            fileKey: "key123",
+            parts: 3,
+          }),
+        },
+      );
+      expect(result).toEqual(mockResult);
+    });
+
+    it("should have finalizeUpload method", () => {
+      const sdk = CoperaAI({ apiKey });
+      expect(sdk.drive).toHaveProperty("finalizeUpload");
+      expect(typeof sdk.drive.finalizeUpload).toBe("function");
+    });
+
+    it("should call finalizeUpload with correct parameters", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const mockFile = {
+        id: "file123",
+        name: "report.pdf",
+        type: "file",
+        createdAt: "2024-01-01",
+        updatedAt: "2024-01-01",
+      };
+      const parts = [
+        { partNumber: 1, eTag: "etag1" },
+        { partNumber: 2, eTag: "etag2" },
+      ];
+
+      mockRequest.mockResolvedValue(mockFile);
+
+      const result = await sdk.drive.finalizeUpload({
+        uploadId: "upload123",
+        fileKey: "key123",
+        parts,
+      });
+
+      expect(mockRequest).toHaveBeenCalledWith(
+        "/drive/files/upload/multipart/finalize",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            uploadId: "upload123",
+            fileKey: "key123",
+            parts,
+          }),
+        },
+      );
+      expect(result).toEqual(mockFile);
     });
   });
 
