@@ -569,12 +569,12 @@ const { uploadId, fileKey } = await copera.drive.startUpload({
 Get presigned S3 URLs for uploading file parts.
 
 ```typescript
-const { urls } = await copera.drive.getPresignedUrls({
+const { parts } = await copera.drive.getPresignedUrls({
   uploadId: 'upload-id',
   fileKey: 'file-key',
   parts: 3
 });
-// Upload each chunk via PUT to the corresponding URL
+// Upload each chunk via PUT to the corresponding signedUrl
 ```
 
 **Parameters:**
@@ -644,6 +644,7 @@ import {
   DriveSearchResult,
   DriveDownloadResult,
   DriveUploadStartResult,
+  DrivePresignedUrlPart,
   DriveUploadPresignedUrlsResult,
   DriveUploadPart,
   GetDriveTreeParams,
@@ -834,8 +835,13 @@ interface DriveUploadStartResult {
   fileKey: string;
 }
 
+interface DrivePresignedUrlPart {
+  signedUrl: string;
+  PartNumber: number;
+}
+
 interface DriveUploadPresignedUrlsResult {
-  urls: string[];
+  parts: DrivePresignedUrlPart[];
 }
 
 interface DriveUploadPart {
@@ -1004,14 +1010,14 @@ async function manageDrive() {
   });
 
   // 3. Get presigned URLs for upload chunks
-  const { urls } = await copera.drive.getPresignedUrls({
+  const { parts: presignedParts } = await copera.drive.getPresignedUrls({
     uploadId,
     fileKey,
     parts: 1
   });
 
   // 4. Upload chunks to S3 (using fetch or any HTTP client)
-  const response = await fetch(urls[0], {
+  const response = await fetch(presignedParts[0].signedUrl, {
     method: 'PUT',
     body: fileBuffer
   });

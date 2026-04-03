@@ -279,8 +279,13 @@ export interface DriveUploadStartResult {
   fileKey: string;
 }
 
+export interface DrivePresignedUrlPart {
+  signedUrl: string;
+  PartNumber: number;
+}
+
 export interface DriveUploadPresignedUrlsResult {
-  urls: string[];
+  parts: DrivePresignedUrlPart[];
 }
 
 export interface DriveUploadPart {

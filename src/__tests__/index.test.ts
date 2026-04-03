@@ -1080,7 +1080,9 @@ describe("CoperaAI", () => {
 
     it("should call getPresignedUrls with correct parameters", async () => {
       const sdk = CoperaAI({ apiKey });
-      const mockResult = { urls: ["https://s3.example.com/part1"] };
+      const mockResult = {
+        parts: [{ signedUrl: "https://s3.example.com/part1", PartNumber: 1 }],
+      };
 
       mockRequest.mockResolvedValue(mockResult);
 
