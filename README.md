@@ -147,18 +147,29 @@ const table = await copera.board.getBoardTable({
 
 #### `listTableRows(params)`
 
-List all rows in a table.
+List rows in a table, optionally filtered and sorted.
 
 ```typescript
 const rows = await copera.board.listTableRows({
   boardId: 'board-id',
-  tableId: 'table-id'
+  tableId: 'table-id',
+  filter: {
+    match: 'and',
+    conditions: [
+      { column_id: 'col_status', operator: 'equals', value: ['opt_done'] },
+      { column_id: 'col_due',    operator: 'before', value: '2026-12-31' },
+      { column_id: 'col_assignee', operator: 'is_empty' }
+    ]
+  },
+  sort: [{ column: 'col_due', dir: 'asc' }]
 });
 ```
 
 **Parameters:**
 - `boardId` (string, required) - The board ID
 - `tableId` (string, required) - The table ID
+- `filter` (optional) - `{match: 'and' | 'or', conditions: RowFilterCondition[]}`. See the API docs for the operator catalog per column type. `is_empty` / `is_not_empty` take no `value`.
+- `sort` (optional) - Array of `{column, dir}` entries (`dir` is `'asc'` or `'desc'`).
 
 **Returns:** `Promise<Row[]>`
 

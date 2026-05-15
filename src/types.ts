@@ -50,6 +50,95 @@ export interface Row {
   updatedAt: string;
 }
 
+// Row Filter / Sort Types
+
+export type RowFilterMatch = "and" | "or";
+
+export type RowFilterStringOperator =
+  | "equals"
+  | "not_equals"
+  | "contains"
+  | "not_contains"
+  | "starts_with"
+  | "ends_with"
+  | "is_empty"
+  | "is_not_empty";
+
+export type RowFilterNumberOperator =
+  | "equals"
+  | "not_equals"
+  | "gt"
+  | "gte"
+  | "lt"
+  | "lte"
+  | "includes"
+  | "not_includes"
+  | "is_empty"
+  | "is_not_empty";
+
+export type RowFilterSelectOperator =
+  | "equals"
+  | "not_equals"
+  | "includes"
+  | "not_includes"
+  | "is_empty"
+  | "is_not_empty";
+
+export type RowFilterBoolOperator =
+  | "equals"
+  | "not_equals"
+  | "is_empty"
+  | "is_not_empty";
+
+export type RowFilterDateOperator =
+  | "equals"
+  | "before"
+  | "after"
+  | "between"
+  | "today"
+  | "yesterday"
+  | "tomorrow"
+  | "next_7_days"
+  | "last_7_days"
+  | "current_week"
+  | "last_week"
+  | "next_week"
+  | "current_month"
+  | "last_month"
+  | "next_month"
+  | "is_empty"
+  | "is_not_empty";
+
+export type RowFilterOperator =
+  | RowFilterStringOperator
+  | RowFilterNumberOperator
+  | RowFilterSelectOperator
+  | RowFilterBoolOperator
+  | RowFilterDateOperator;
+
+export interface RowFilterCondition {
+  column_id: string;
+  operator: RowFilterOperator;
+  value?: unknown;
+}
+
+export interface RowFilter {
+  match?: RowFilterMatch;
+  conditions: RowFilterCondition[];
+}
+
+export interface RowSort {
+  column: string;
+  dir: "asc" | "desc";
+}
+
+export interface ListTableRowsParams {
+  boardId: string;
+  tableId: string;
+  filter?: RowFilter;
+  sort?: RowSort[];
+}
+
 // Request/Response Types
 export interface SendMessageParams {
   channelId: string;

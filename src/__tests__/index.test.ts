@@ -201,6 +201,54 @@ describe("CoperaAI", () => {
       expect(result).toEqual(mockRows);
     });
 
+    it("should pass filter and sort to listTableRows as query params", async () => {
+      const sdk = CoperaAI({ apiKey });
+      const boardId = "board123";
+      const tableId = "table123";
+      mockRequest.mockResolvedValue([]);
+
+      await sdk.board.listTableRows({
+        boardId,
+        tableId,
+        filter: {
+          match: "and",
+          conditions: [
+            { column_id: "col_a", operator: "contains", value: "foo" },
+            { column_id: "col_b", operator: "is_empty" },
+          ],
+        },
+        sort: [
+          { column: "col_a", dir: "asc" },
+          { column: "col_b", dir: "desc" },
+        ],
+      });
+
+      const expectedFilter = encodeURIComponent(
+        JSON.stringify({
+          match: "and",
+          conditions: [
+            { column_id: "col_a", operator: "contains", value: "foo" },
+            { column_id: "col_b", operator: "is_empty" },
+          ],
+        }),
+      );
+      expect(mockRequest).toHaveBeenCalledWith(
+        `/board/${boardId}/table/${tableId}/rows?filter=${expectedFilter}&sort=col_a%3Aasc%2Ccol_b%3Adesc`,
+        { method: "GET" },
+      );
+    });
+
+    it("should omit query string when filter and sort are absent", async () => {
+      const sdk = CoperaAI({ apiKey });
+      mockRequest.mockResolvedValue([]);
+
+      await sdk.board.listTableRows({ boardId: "b", tableId: "t" });
+
+      expect(mockRequest).toHaveBeenCalledWith("/board/b/table/t/rows", {
+        method: "GET",
+      });
+    });
+
     it("should have getTableRow method", () => {
       const sdk = CoperaAI({ apiKey });
       expect(sdk.board).toHaveProperty("getTableRow");
